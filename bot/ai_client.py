@@ -9,13 +9,19 @@ from bot.config import (
 
 logger = logging.getLogger(__name__)
 
-mistral_client = Mistral(api_key=MISTRAL_API_KEY)
+_mistral_client = None
 
+def get_client() -> Mistral:
+    global _mistral_client
+    if _mistral_client is None:
+        _mistral_client = Mistral(api_key=MISTRAL_API_KEY)
+    return _mistral_client
 
 async def get_car_info(car_name: str) -> str:
     """Mashina haqida to'liq ma'lumot olish"""
     try:
-        response = await mistral_client.chat.complete_async(
+        client = get_client()
+        response = await client.chat.complete_async(
             model=CAR_MODEL,
             messages=[
                 CAR_SYSTEM_PROMPT,
@@ -36,7 +42,8 @@ async def get_car_info(car_name: str) -> str:
 async def compare_cars(car_names: str) -> str:
     """Ikki yoki undan ko'p mashinani taqqoslash"""
     try:
-        response = await mistral_client.chat.complete_async(
+        client = get_client()
+        response = await client.chat.complete_async(
             model=CAR_MODEL,
             messages=[
                 CAR_COMPARE_PROMPT,
@@ -57,7 +64,8 @@ async def compare_cars(car_names: str) -> str:
 async def ask_car_question(question: str) -> str:
     """Mashina haqida umumiy savol berish"""
     try:
-        response = await mistral_client.chat.complete_async(
+        client = get_client()
+        response = await client.chat.complete_async(
             model=CAR_MODEL,
             messages=[
                 {
@@ -83,8 +91,14 @@ async def ask_car_question(question: str) -> str:
 
 
 async def close_client():
-    try:
-        await mistral_client.close_async()
-        logger.info("Mistral client yopildi")
-    except Exception as e:
-        logger.warning(f"Mistral client yopishda xato: {e}")
+    global _mistral_client
+    if _mistral_client is not None:
+        try:
+            # For mistral v2 client, close doesn't seem to be widely exported,
+            # but we can try just setting it to None if close_async is missing.
+            if hasattr(_mistral_client, "close_async"):
+                await _mistral_client.close_async()
+            logger.info("Mistral client yopildi")
+            _mistral_client = None
+        except Exception as e:
+            logger.warning(f"Mistral client yopishda xato: {e}")

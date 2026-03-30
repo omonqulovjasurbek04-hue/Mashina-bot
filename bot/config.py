@@ -10,7 +10,7 @@ MAX_HISTORY = 10
 RATE_LIMIT_SECONDS = 2
 
 # Mashina so'rovi uchun ishlatiladigan model
-CAR_MODEL = "mistral-large-latest"
+CAR_MODEL = "mistral-small-latest"
 
 # Mashina kategoriyalari
 CAR_CATEGORIES = {
@@ -44,16 +44,7 @@ POPULAR_BRANDS = {
     "haval": "🇨🇳 Haval",
 }
 
-# Foydalanuvchi holatlari
-user_states: dict[int, dict] = {}
-
-def get_user_state(user_id: int) -> dict:
-    if user_id not in user_states:
-        user_states[user_id] = {"mode": "idle"}
-    return user_states[user_id]
-
-def set_user_state(user_id: int, state: dict):
-    user_states[user_id] = state
+# Foydalanuvchi holatlari o'chirib tashlandi (Aiogram FSM ishlatiladi)
 
 # Mashina eksperti uchun system prompt
 CAR_SYSTEM_PROMPT = {
