@@ -44,7 +44,19 @@ POPULAR_BRANDS = {
     "haval": "🇨🇳 Haval",
 }
 
-# Foydalanuvchi holatlari o'chirib tashlandi (Aiogram FSM ishlatiladi)
+# Foydalanuvchi holatlari uchun vaqtinchalik xotira
+user_states = {}
+
+def get_user_state(user_id: int) -> dict:
+    """Foydalanuvchi holatini qaytaradi"""
+    return user_states.get(user_id, {"mode": "idle"})
+
+def set_user_state(user_id: int, state: dict):
+    """Foydalanuvchi holatini yangilaydi"""
+    if user_id not in user_states:
+        user_states[user_id] = {"mode": "idle"}
+    user_states[user_id].update(state)
+
 
 # Mashina eksperti uchun system prompt
 CAR_SYSTEM_PROMPT = {
